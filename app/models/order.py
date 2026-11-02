@@ -30,7 +30,10 @@ class Order(Base):
 
     id = Column(Integer, primary_key=True)
     order_number = Column(String(24), nullable=False, unique=True, index=True)
-    customer_id = Column(Integer, ForeignKey("customers.id"), nullable=False)
+    # Nullable because the invoice outlives the account. On erasure the
+    # order is kept in reduced form for as long as tax law wants it and
+    # stops pointing at a person. See app/services/erasure.py.
+    customer_id = Column(Integer, ForeignKey("customers.id"))
 
     recipient_name = Column(String(255), nullable=False)
     recipient_phone = Column(String(15), nullable=False)
