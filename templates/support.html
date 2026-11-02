@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Customer Service | BharatBazaar{% endblock %}
+{% block content %}
+
+<div class="panel" style="max-width:620px">
+  <h2>Customer Service</h2>
+  <p class="hint">
+    Grievances are answered within 30 days. Our Grievance Officer is
+    {{ grievance_officer }}.
+  </p>
+  <form method="post" action="/support">
+    <div class="field">
+      <label for="cat">What is this about</label>
+      <select id="cat" name="category">
+        {% for c in categories %}<option value="{{ c }}">{{ c.replace('_',' ') }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="field"><label for="sj">Subject</label><input id="sj" name="subject" required></div>
+    <div class="field"><label for="bd">Details</label><textarea id="bd" name="body" rows="5" required></textarea></div>
+    <button class="btn" type="submit">Submit</button>
+  </form>
+</div>
+
+{% if tickets %}
+<div class="panel">
+  <h2>Your tickets</h2>
+  <table class="rows">
+    <tr><th>Subject</th><th>Category</th><th>Status</th><th>Respond by</th></tr>
+    {% for t in tickets %}
+    <tr><td>{{ t.subject }}</td><td>{{ t.category }}</td><td>{{ t.status }}</td><td>{{ t.respond_by }}</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endif %}
+
+{% endblock %}

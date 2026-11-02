@@ -5,3 +5,7 @@ venv/
 .env
 *.sqlite3
 .DS_Store
+
+# Local database, rebuilt by seed.py
+bharatbazaar.db
+.claude/

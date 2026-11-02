@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Your Account | BharatBazaar{% endblock %}
+{% block content %}
+
+<div class="panel"><h2>Your Account</h2></div>
+
+<div class="shelf">
+  <a class="card" href="/account/orders"><b>Your Orders</b><div class="hint">Track, return or buy again</div></a>
+  <a class="card" href="/account/addresses"><b>Your Addresses</b><div class="hint">Edit or add delivery addresses</div></a>
+  <a class="card" href="/account/privacy"><b>Your data and privacy</b><div class="hint">Export, consents, nominee, deletion</div></a>
+  <a class="card" href="/support"><b>Customer Service</b><div class="hint">Raise and track a grievance</div></a>
+  <a class="card" href="/logout"><b>Sign out</b><div class="hint">End this session</div></a>
+</div>
+
+{% endblock %}

@@ -5,7 +5,7 @@ works in India: a large share of customers have no email address and
 the OTP is the whole login flow. Everything else hangs off that.
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from sqlalchemy import (
     Boolean,
@@ -20,6 +20,21 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 
 from app.database import Base
+
+# s.8(7): the point at which a purpose is no longer served and the row
+# has to go. Per category, because a grievance record and an OTP
+# attempt do not deserve the same life.
+RETENTION_DAYS = {
+    "account": 365 * 3,
+    "order": 365 * 8,
+    "grievance": 365 * 2,
+    "otp": 90,
+    "browsing": 180,
+}
+
+
+def expires_in(category: str) -> datetime:
+    return datetime.utcnow() + timedelta(days=RETENTION_DAYS[category])
 
 
 class Customer(Base):
@@ -43,10 +58,10 @@ class Customer(Base):
     password_hash = Column(Text)
     otp_secret = Column(String(64))
 
-    # One flag for everything. Nobody can say which notice this was
-    # taken against or when, and switching it off leaves no record
-    # that it was ever on.
-    marketing_opt_in = Column(Boolean, default=True, nullable=False)
+    # Kept only so the old mobile build keeps deserialising. The
+    # answer that counts is the newest ConsentEvent row for the
+    # purpose; see app/services/consent.py.
+    marketing_opt_in = Column(Boolean, default=False, nullable=False)
 
     referral_code = Column(String(16), index=True)
     referred_by = Column(Integer, ForeignKey("customers.id"))
@@ -56,9 +71,12 @@ class Customer(Base):
 
     created_at = Column(DateTime, default=datetime.utcnow)
     last_login_at = Column(DateTime)
+    # s.8(7)(a). The row carries the date it stops being needed.
+    expires_at = Column(DateTime, default=lambda: expires_in("account"), index=True)
 
     addresses = relationship("Address", back_populates="customer")
     orders = relationship("Order", back_populates="customer")
+    consents = relationship("ConsentEvent", back_populates="customer")
 
 
 class Address(Base):
@@ -92,6 +110,7 @@ class Address(Base):
     is_deleted = Column(Boolean, default=False)
 
     created_at = Column(DateTime, default=datetime.utcnow)
+    expires_at = Column(DateTime, default=lambda: expires_in("account"), index=True)
 
     customer = relationship("Customer", back_populates="addresses")
 
@@ -112,13 +131,14 @@ class SavedPaymentMethod(Base):
     gateway_token = Column(String(255))
 
     created_at = Column(DateTime, default=datetime.utcnow)
+    expires_at = Column(DateTime, default=lambda: expires_in("account"), index=True)
 
 
 class OtpAttempt(Base):
     """Every OTP sent, kept for the fraud team.
 
-    No expiry on the row, so the fraud team has a complete history of
-    which number logged in from which device going back to launch.
+    Ninety days, which is as far back as a chargeback can reach. The
+    sweep in app/services/retention.py deletes the rest.
     """
 
     __tablename__ = "otp_attempts"
@@ -131,3 +151,65 @@ class OtpAttempt(Base):
     user_agent = Column(Text)
     succeeded = Column(Boolean, default=False)
     attempted_at = Column(DateTime, default=datetime.utcnow)
+    expires_at = Column(DateTime, default=lambda: expires_in("otp"), index=True)
+
+
+class ConsentEvent(Base):
+    """s.6. An event, not a flag.
+
+    A boolean records that somebody agreed. It does not record what
+    they agreed to, when, or which notice they were shown, and none of
+    those can be reconstructed afterwards. A withdrawal is a second
+    row rather than a mutation, so the history survives it.
+    """
+
+    __tablename__ = "consent_events"
+
+    id = Column(Integer, primary_key=True)
+    customer_id = Column(
+        Integer, ForeignKey("customers.id", ondelete="CASCADE"), index=True
+    )
+
+    purpose = Column(String(64), nullable=False)
+    granted = Column(Boolean, nullable=False)
+    notice_version = Column(String(32), nullable=False)
+    source = Column(String(32), default="web")
+    consented_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    customer = relationship("Customer", back_populates="consents")
+
+
+class Nomination(Base):
+    """s.14. Who may exercise these rights if the Data Principal cannot.
+
+    Almost nothing implements this, which is why it is here.
+    """
+
+    __tablename__ = "nominations"
+
+    id = Column(Integer, primary_key=True)
+    customer_id = Column(
+        Integer, ForeignKey("customers.id", ondelete="CASCADE"), unique=True
+    )
+    nominee_name = Column(String(255), nullable=False)
+    nominee_email = Column(String(320), nullable=False)
+    nominated_at = Column(DateTime, default=datetime.utcnow)
+    expires_at = Column(DateTime, default=lambda: expires_in("account"))
+
+
+class AuditLog(Base):
+    """s.8(1). Who read or changed personal data, and when.
+
+    Written from the service layer rather than from each handler, so a
+    new endpoint cannot forget to record itself.
+    """
+
+    __tablename__ = "audit_logs"
+
+    id = Column(Integer, primary_key=True)
+    actor_customer_id = Column(Integer, index=True)
+    action = Column(String(64), nullable=False)
+    resource_type = Column(String(64), nullable=False)
+    resource_id = Column(String(64), nullable=False)
+    occurred_at = Column(DateTime, default=datetime.utcnow, index=True)
+    expires_at = Column(DateTime, default=lambda: expires_in("order"))

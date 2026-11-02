@@ -2,11 +2,15 @@
 
 A marketplace seller is a person too, and the KYC pack is the most
 sensitive data in the whole system: Aadhaar, PAN, bank account and a
-cancelled cheque image. It is collected once at onboarding and then
-sits in the table for the life of the account.
+cancelled cheque image. It is collected once at onboarding and carries
+the eight year expiry that the tax and company law records need.
+
+What it does not carry is encryption. The columns below are plaintext,
+which is the single worst thing in this repository and is left here on
+purpose.
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from sqlalchemy import (
     Boolean,
@@ -49,6 +53,11 @@ class Seller(Base):
     commission_rate = Column(Numeric(5, 2), default=15.00)
     is_active = Column(Boolean, default=True)
     onboarded_at = Column(DateTime, default=datetime.utcnow)
+    # Eight years after onboarding, which is the window the tax and
+    # company law records need. The KYC pack goes with the row.
+    expires_at = Column(
+        DateTime, default=lambda: datetime.utcnow() + timedelta(days=365 * 8), index=True
+    )
 
     documents = relationship("SellerDocument", back_populates="seller")
 
@@ -89,3 +98,6 @@ class SellerPayout(Base):
     utr_reference = Column(String(32))
     status = Column(String(16), default="pending")
     settled_at = Column(DateTime)
+    expires_at = Column(
+        DateTime, default=lambda: datetime.utcnow() + timedelta(days=365 * 8), index=True
+    )

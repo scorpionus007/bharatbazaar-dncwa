@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Your data and privacy | BharatBazaar{% endblock %}
+{% block content %}
+
+<div class="panel">
+  <h2>Your data and privacy</h2>
+  <p style="max-width:75ch">
+    What we hold about you, who we share it with, and the things you
+    can ask us to do about it under the Digital Personal Data
+    Protection Act 2023.
+  </p>
+</div>
+
+<div class="panel" id="processors">
+  <h2>Who we share it with</h2>
+  <p class="hint">Section 11(1)(b) gives you the identities of everyone your data reached.</p>
+  <table class="rows">
+    <tr><th>Recipient</th><th>What they get</th><th>Why</th></tr>
+    {% for p in processors %}
+    <tr><td><b>{{ p.name }}</b></td><td>{{ p.data_shared }}</td><td>{{ p.purpose }}</td></tr>
+    {% endfor %}
+  </table>
+</div>
+
+{% if customer %}
+
+<div class="panel">
+  <h2>What we hold</h2>
+  <table class="rows">
+    <tr><th>Field</th><th>Value</th><th>Why</th></tr>
+    <tr><td>Name</td><td>{{ customer.full_name }}</td><td>Addressing your parcels</td></tr>
+    <tr><td>Mobile</td><td>{{ customer.phone_number }}</td><td>Signing in, delivery contact</td></tr>
+    <tr><td>Email</td><td>{{ customer.email_address or "not given" }}</td><td>Order receipts</td></tr>
+    <tr><td>Date of birth</td><td>{{ customer.date_of_birth or "not given" }}</td><td>Birthday offers</td></tr>
+  </table>
+  <p style="margin-top:12px">
+    <a class="btn btn-grey" href="/account/privacy/export">Download everything we hold</a>
+  </p>
+</div>
+
+<div class="panel">
+  <h2>Your consents</h2>
+  <table class="rows">
+    <tr><th>Purpose</th><th>Status</th><th>Notice</th><th></th></tr>
+    {% for c in consents %}
+    <tr>
+      <td>{{ c.label }}</td>
+      <td>{% if c.granted %}Given{% else %}Withdrawn{% endif %}</td>
+      <td class="hint">{{ c.notice_version }}</td>
+      <td>
+        <form method="post" action="/account/privacy/consent">
+          <input type="hidden" name="purpose" value="{{ c.purpose }}">
+          <input type="hidden" name="granted" value="{{ 'no' if c.granted else 'yes' }}">
+          <button class="btn btn-grey" type="submit">{{ "Withdraw" if c.granted else "Give consent" }}</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+
+<div class="panel">
+  <h2>Nominate someone</h2>
+  <p class="hint" style="max-width:70ch">
+    Section 14 lets you name a person who may exercise these rights on
+    your behalf if you die or cannot act for yourself.
+  </p>
+  <form method="post" action="/account/privacy/nominate">
+    <div class="field"><label for="nn">Their name</label><input id="nn" name="nominee_name" value="{{ nominee.nominee_name if nominee else '' }}" required></div>
+    <div class="field"><label for="ne">Their email</label><input id="ne" name="nominee_email" type="email" value="{{ nominee.nominee_email if nominee else '' }}" required></div>
+    <button class="btn" type="submit">{{ "Update nominee" if nominee else "Save nominee" }}</button>
+  </form>
+</div>
+
+<div class="panel">
+  <h2>Delete your account</h2>
+  <p class="hint" style="max-width:70ch">
+    Section 12(3). This erases your profile, addresses, saved payment
+    methods, cart, wishlist and browsing history. Orders are kept in a
+    reduced form because tax law requires the invoice, and the record
+    that is kept is listed before you confirm.
+  </p>
+  <form method="post" action="/account/privacy/erase"
+        onsubmit="return confirm('Erase your BharatBazaar account? This cannot be undone.')">
+    <button class="btn btn-grey" type="submit">Erase my account</button>
+  </form>
+</div>
+
+{% else %}
+<div class="panel empty">
+  <p><a href="/login">Sign in</a> to see what we hold about you.</p>
+</div>
+{% endif %}
+
+{% endblock %}

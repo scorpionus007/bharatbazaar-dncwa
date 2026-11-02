@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Checkout | BharatBazaar{% endblock %}
+{% block content %}
+
+<div class="with-side" style="grid-template-columns:1fr 300px">
+  <div class="panel">
+    <h2>Checkout</h2>
+    <form method="post" action="/checkout">
+      <h3>Delivery address</h3>
+      {% if addresses %}
+      <div class="field">
+        <label for="addr">Deliver to</label>
+        <select id="addr" name="address_id">
+          {% for a in addresses %}
+          <option value="{{ a.id }}">{{ a.recipient_name }}, {{ a.address_line_1 }}, {{ a.city }} {{ a.pincode }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      {% else %}
+      <div class="field"><label for="rn">Full name</label><input id="rn" name="recipient_name" required></div>
+      <div class="field"><label for="rp">Phone</label><input id="rp" name="recipient_phone" inputmode="numeric" required></div>
+      <div class="field"><label for="a1">Address</label><input id="a1" name="address_line_1" required></div>
+      <div class="field"><label for="ct">City</label><input id="ct" name="city" required></div>
+      <div class="field"><label for="st">State</label><input id="st" name="state" required></div>
+      <div class="field"><label for="pc">Pincode</label><input id="pc" name="pincode" inputmode="numeric" required></div>
+      {% endif %}
+
+      <h3>Payment</h3>
+      <div class="field">
+        <label for="pm">Method</label>
+        <select id="pm" name="payment_method">
+          <option value="upi">UPI</option>
+          <option value="card">Credit or debit card</option>
+          <option value="cod">Cash on delivery</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="cp">Coupon</label>
+        <input id="cp" name="coupon_code" placeholder="FIRST100, BAZAAR50, DIWALI500">
+      </div>
+
+      <button class="btn btn-wide" type="submit">Place your order</button>
+    </form>
+  </div>
+
+  <aside class="side">
+    <h3>Order summary</h3>
+    <table class="rows">
+      <tr><td>Items</td><td>&#8377;{{ totals.subtotal }}</td></tr>
+      <tr><td>Delivery</td><td>&#8377;{{ totals.shipping_fee }}</td></tr>
+      <tr><td>GST</td><td>&#8377;{{ totals.gst }}</td></tr>
+      <tr><td><b>Order total</b></td><td><b>&#8377;{{ totals.total }}</b></td></tr>
+    </table>
+  </aside>
+</div>
+
+{% endblock %}

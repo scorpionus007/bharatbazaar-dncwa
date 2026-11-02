@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Your Addresses | BharatBazaar{% endblock %}
+{% block content %}
+
+<div class="panel">
+  <h2>Your Addresses</h2>
+  {% if addresses %}
+  <table class="rows">
+    <tr><th>Name</th><th>Address</th><th>Pincode</th><th></th></tr>
+    {% for a in addresses %}
+    <tr>
+      <td>{{ a.recipient_name }}<div class="hint">{{ a.recipient_phone }}</div></td>
+      <td>{{ a.address_line_1 }}, {{ a.city }}, {{ a.state }}</td>
+      <td>{{ a.pincode }}</td>
+      <td>
+        <form method="post" action="/account/addresses/delete">
+          <input type="hidden" name="address_id" value="{{ a.id }}">
+          <button class="btn btn-grey" type="submit">Remove</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p class="hint">No addresses saved yet.</p>
+  {% endif %}
+</div>
+
+<div class="panel" style="max-width:480px">
+  <h2>Add an address</h2>
+  <form method="post" action="/account/addresses">
+    <div class="field"><label for="rn">Full name</label><input id="rn" name="recipient_name" required></div>
+    <div class="field"><label for="rp">Phone</label><input id="rp" name="recipient_phone" inputmode="numeric" required></div>
+    <div class="field"><label for="a1">Flat, house, building</label><input id="a1" name="address_line_1" required></div>
+    <div class="field"><label for="ct">City</label><input id="ct" name="city" required></div>
+    <div class="field"><label for="st">State</label><input id="st" name="state" required></div>
+    <div class="field"><label for="pc">Pincode</label><input id="pc" name="pincode" inputmode="numeric" required></div>
+    <button class="btn" type="submit">Save address</button>
+  </form>
+</div>
+
+{% endblock %}

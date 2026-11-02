@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}{{ product.title }} | BharatBazaar{% endblock %}
+{% block content %}
+
+<div class="crumbs"><a href="/c/{{ product.category_slug }}">{{ product.category_name }}</a> &rsaquo; {{ product.brand }}</div>
+
+<div class="panel">
+  <div class="grid-detail">
+
+    <div class="thumb" style="height:320px;font-size:130px">{{ product.emoji }}</div>
+
+    <div>
+      <h1 style="font-size:24px;margin:0 0 6px">{{ product.title }}</h1>
+      <div style="margin-bottom:8px">Brand: <a href="/search?q={{ product.brand }}">{{ product.brand }}</a></div>
+      <div class="stars">{{ product.stars }}<span class="count">{{ product.review_count }} ratings</span></div>
+      <hr style="border:0;border-top:1px solid var(--line);margin:12px 0">
+
+      <div class="price">
+        <span class="sym">&#8377;</span>{{ product.selling_price_display }}
+        {% if product.discount_pct %}
+        <span class="mrp">M.R.P.: <s>&#8377;{{ product.mrp_display }}</s></span>
+        <span class="off">({{ product.discount_pct }}% off)</span>
+        {% endif %}
+      </div>
+      <div class="hint">Inclusive of all taxes</div>
+
+      <h3 style="margin:18px 0 6px;font-size:16px">About this item</h3>
+      <p style="font-size:14px;max-width:65ch">{{ product.description }}</p>
+
+      <h3 style="margin:18px 0 6px;font-size:16px">Customer reviews</h3>
+      {% if reviews %}
+        {% for r in reviews %}
+        <div style="border-top:1px solid var(--line);padding:10px 0">
+          <div class="stars">{{ r.stars }}</div>
+          <div style="font-weight:700">{{ r.title }}</div>
+          <div class="hint">Reviewed by {{ r.reviewer_display_name }}{% if r.is_verified_purchase %} &middot; Verified Purchase{% endif %}</div>
+          <p style="margin:6px 0 0">{{ r.body }}</p>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p class="hint">No reviews yet.</p>
+      {% endif %}
+    </div>
+
+    <aside class="buybox">
+      <div class="price"><span class="sym">&#8377;</span>{{ product.selling_price_display }}</div>
+      <div class="delivery">FREE delivery <b>{{ product.delivery_day }}</b></div>
+      <div class="in-stock">{% if product.in_stock %}In stock{% else %}Currently unavailable{% endif %}</div>
+      <div class="hint">Sold by {{ product.seller_name }}</div>
+
+      {% if product.in_stock %}
+      <form method="post" action="/cart/add" style="margin-top:14px">
+        <input type="hidden" name="product_id" value="{{ product.id }}">
+        <div class="field">
+          <label for="qty">Quantity</label>
+          <select id="qty" name="quantity">
+            {% for n in [1,2,3,4,5] %}<option value="{{ n }}">{{ n }}</option>{% endfor %}
+          </select>
+        </div>
+        <button class="btn btn-wide" type="submit">Add to Cart</button>
+      </form>
+      {% endif %}
+    </aside>
+
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,23 @@
+<div class="card">
+  {% if product.discount_pct >= 20 %}
+  <span class="badge-deal">{{ product.discount_pct }}% off</span>
+  {% endif %}
+  <a href="/p/{{ product.id }}"><div class="thumb">{{ product.emoji }}</div></a>
+  <a class="title" href="/p/{{ product.id }}">{{ product.title }}</a>
+  <div class="brand-line">{{ product.brand }}</div>
+  <div class="stars">
+    {{ product.stars }}<span class="count">{{ product.review_count }}</span>
+  </div>
+  <div class="price">
+    <span class="sym">&#8377;</span>{{ product.selling_price_display }}
+    {% if product.discount_pct %}
+    <span class="mrp"><s>&#8377;{{ product.mrp_display }}</s></span>
+    <span class="off">({{ product.discount_pct }}% off)</span>
+    {% endif %}
+  </div>
+  <div class="delivery">FREE delivery <b>{{ product.delivery_day }}</b></div>
+  <form method="post" action="/cart/add" style="margin-top:10px">
+    <input type="hidden" name="product_id" value="{{ product.id }}">
+    <button class="btn btn-wide" type="submit">Add to Cart</button>
+  </form>
+</div>

@@ -1,6 +1,6 @@
 """Catalogue: products, categories, reviews and the wishlist."""
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from sqlalchemy import (
     Boolean,
@@ -62,7 +62,9 @@ class Review(Base):
 
     id = Column(Integer, primary_key=True)
     product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
-    customer_id = Column(Integer, ForeignKey("customers.id"), nullable=False)
+    # Nullable so an erased customer's review can stay up without
+    # still pointing at them. See app/services/erasure.py.
+    customer_id = Column(Integer, ForeignKey("customers.id"))
 
     rating = Column(Integer, nullable=False)
     title = Column(String(255))
@@ -72,6 +74,11 @@ class Review(Base):
     photo_urls = Column(Text)
 
     created_at = Column(DateTime, default=datetime.utcnow)
+    # Five years. After that the product has usually gone and the
+    # review is a person's writing with their name beside it.
+    expires_at = Column(
+        DateTime, default=lambda: datetime.utcnow() + timedelta(days=365 * 5)
+    )
 
     product = relationship("Product", back_populates="reviews")
 
@@ -105,3 +112,8 @@ class BrowsingEvent(Base):
     dwell_seconds = Column(Integer)
 
     viewed_at = Column(DateTime, default=datetime.utcnow, index=True)
+    # Six months. A recommendation model does not improve on a view
+    # from two years ago and the row is still a person's history.
+    expires_at = Column(
+        DateTime, default=lambda: datetime.utcnow() + timedelta(days=180), index=True
+    )

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Your Orders | BharatBazaar{% endblock %}
+{% block content %}
+
+<div class="panel">
+  <h2>Your Orders</h2>
+  {% if orders %}
+  <table class="rows">
+    <tr><th>Order</th><th>Placed</th><th>Ship to</th><th>Total</th><th>Status</th></tr>
+    {% for o in orders %}
+    <tr>
+      <td><b>{{ o.order_number }}</b></td>
+      <td>{{ o.placed_on }}</td>
+      <td>{{ o.recipient_name }}<div class="hint">{{ o.delivery_pincode }}</div></td>
+      <td>&#8377;{{ o.total_display }}</td>
+      <td>{{ o.status }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <div class="empty"><div class="big">&#128230;</div><p>No orders yet.</p></div>
+  {% endif %}
+</div>
+
+{% endblock %}

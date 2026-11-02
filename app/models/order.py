@@ -1,6 +1,6 @@
 """Orders, payments and delivery tracking."""
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from sqlalchemy import (
     Boolean,
@@ -49,6 +49,11 @@ class Order(Base):
 
     placed_at = Column(DateTime, default=datetime.utcnow)
     delivered_at = Column(DateTime)
+    # Eight years, which is what section 128 of the Companies Act asks
+    # of books of account. s.8(7) allows retention a law requires.
+    expires_at = Column(
+        DateTime, default=lambda: datetime.utcnow() + timedelta(days=365 * 8), index=True
+    )
 
     customer = relationship("Customer", back_populates="orders")
     items = relationship("OrderItem", back_populates="order")
@@ -93,6 +98,9 @@ class Payment(Base):
     raw_gateway_response = Column(Text)
 
     created_at = Column(DateTime, default=datetime.utcnow)
+    expires_at = Column(
+        DateTime, default=lambda: datetime.utcnow() + timedelta(days=365 * 8), index=True
+    )
 
 
 class DeliveryTracking(Base):
@@ -112,3 +120,8 @@ class DeliveryTracking(Base):
     recipient_signature_url = Column(String(512))
 
     event_at = Column(DateTime, default=datetime.utcnow)
+    # A year. The courier keeps its own record; this copy is for the
+    # tracking page and stops being useful long before that.
+    expires_at = Column(
+        DateTime, default=lambda: datetime.utcnow() + timedelta(days=365)
+    )

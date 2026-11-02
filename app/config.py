@@ -6,14 +6,21 @@ the seller document bucket needed one.
 """
 
 import os
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
 class Settings:
     app_name = "BharatBazaar"
     environment = os.environ.get("ENVIRONMENT", "development")
 
+    # SQLite by default so the storefront runs from a clone with no
+    # database to stand up first. The path is absolute, so the server
+    # finds the same file wherever it was started from. Production
+    # passes a Postgres URL.
     database_url = os.environ.get(
-        "DATABASE_URL", "postgresql://bb:bb@localhost:5432/bharatbazaar"
+        "DATABASE_URL", f"sqlite:///{PROJECT_ROOT / 'bharatbazaar.db'}"
     )
     redis_url = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
 

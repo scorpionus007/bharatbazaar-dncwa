@@ -5,10 +5,13 @@ delivery tracking and support. Everything is mounted here.
 """
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
 from app.api import admin, auth, cart, catalog, customers, orders, payments, sellers, support
 from app.config import settings
+from app.database import Base, engine
 from app.utils.logging import configure
+from app.web import storefront
 
 logger = configure()
 
@@ -28,6 +31,14 @@ app.include_router(sellers.router)
 app.include_router(support.router)
 app.include_router(admin.router)
 
+# The storefront. Mounted last so its "/" does not shadow the API.
+app.include_router(storefront.router)
+app.mount(
+    "/static",
+    StaticFiles(directory=str(storefront.PROJECT_ROOT / "static")),
+    name="static",
+)
+
 
 @app.get("/health")
 async def health():
@@ -36,6 +47,7 @@ async def health():
 
 @app.on_event("startup")
 async def on_startup():
+    Base.metadata.create_all(bind=engine)
     logger.info(
         "%s starting in %s, storage in %s",
         settings.app_name,

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="hero">
+  <h1>Great Indian Festival</h1>
+  <p>
+    Deals across electronics, kitchen, fashion and groceries. Free
+    delivery on orders over &#8377;499, cash on delivery available on
+    every pincode we serve.
+  </p>
+</div>
+
+{% for group in shelves %}
+<div class="panel">
+  <h2>{{ group.name }}</h2>
+  <div class="shelf">
+    {% for product in group.products %}
+      {% include "partials/product_card.html" %}
+    {% endfor %}
+  </div>
+</div>
+{% endfor %}
+
+{% endblock %}

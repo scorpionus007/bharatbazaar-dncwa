@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Sign in | BharatBazaar{% endblock %}
+{% block content %}
+
+<div class="form-narrow">
+  <div class="panel">
+    <h2>Sign in</h2>
+    {% if not otp_sent %}
+    <form method="post" action="/login">
+      <div class="field">
+        <label for="phone">Mobile number</label>
+        <input id="phone" name="phone_number" inputmode="numeric" placeholder="10 digit number" required>
+        <div class="hint">We will send a one time password by SMS.</div>
+      </div>
+      <button class="btn btn-wide" type="submit">Continue</button>
+    </form>
+    {% else %}
+    <form method="post" action="/login/verify">
+      <input type="hidden" name="phone_number" value="{{ phone_number }}">
+      <div class="field">
+        <label for="code">Enter OTP sent to {{ phone_number }}</label>
+        <input id="code" name="code" inputmode="numeric" autofocus required>
+        <div class="hint">Demo build: the code is <b>{{ demo_code }}</b>.</div>
+      </div>
+      <button class="btn btn-wide" type="submit">Sign in</button>
+    </form>
+    {% endif %}
+  </div>
+
+  <div class="panel" style="text-align:center">
+    <p class="hint">New to BharatBazaar?</p>
+    <a class="btn btn-grey btn-wide" href="/register">Create an account</a>
+  </div>
+</div>
+
+{% endblock %}

@@ -9,7 +9,10 @@ from app.models.catalog import (
 )
 from app.models.customer import (
     Address,
+    AuditLog,
+    ConsentEvent,
     Customer,
+    Nomination,
     OtpAttempt,
     SavedPaymentMethod,
 )
@@ -25,10 +28,13 @@ from app.models.support import AbuseReport, ReturnRequest, SupportTicket
 __all__ = [
     "AbuseReport",
     "Address",
+    "AuditLog",
     "BrowsingEvent",
     "Category",
+    "ConsentEvent",
     "Customer",
     "DeliveryTracking",
+    "Nomination",
     "Order",
     "OrderItem",
     "OtpAttempt",

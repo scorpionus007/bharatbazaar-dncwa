@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}{{ heading }} | BharatBazaar{% endblock %}
+{% block content %}
+
+<div class="crumbs">{{ heading }} &nbsp;&middot;&nbsp; {{ products|length }} result(s)</div>
+
+<div class="with-side">
+  <aside class="side">
+    <h3>Category</h3>
+    <ul>
+      {% for c in nav_categories %}
+      <li><a href="/c/{{ c.slug }}">{{ c.name }}</a></li>
+      {% endfor %}
+    </ul>
+    <h3>Customer review</h3>
+    <ul>
+      <li>&#9733;&#9733;&#9733;&#9733;&#9734; &amp; up</li>
+      <li>&#9733;&#9733;&#9733;&#9734;&#9734; &amp; up</li>
+    </ul>
+    <h3>Pay on delivery</h3>
+    <ul><li>Eligible for cash on delivery</li></ul>
+  </aside>
+
+  <div>
+    {% if products %}
+    <div class="shelf">
+      {% for product in products %}
+        {% include "partials/product_card.html" %}
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="panel empty">
+      <div class="big">&#128269;</div>
+      <p>No results{% if query %} for <b>{{ query }}</b>{% endif %}.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}BharatBazaar{% endblock %}</title>
+  <link rel="stylesheet" href="/static/storefront.css">
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-row">
+    <a class="brand" href="/">bharat<span>bazaar</span></a>
+
+    <a class="deliver-to" href="/account/addresses">
+      <span>&#128205;</span>
+      <span>
+        <span class="label">Deliver to</span>
+        <span class="value">{{ deliver_to or "India" }}</span>
+      </span>
+    </a>
+
+    <form class="searchbar" action="/search" method="get">
+      <select name="category" aria-label="Category">
+        <option value="">All</option>
+        {% for c in nav_categories %}
+        <option value="{{ c.slug }}" {% if c.slug == active_category %}selected{% endif %}>{{ c.name }}</option>
+        {% endfor %}
+      </select>
+      <input name="q" value="{{ query or '' }}" placeholder="Search BharatBazaar.in" aria-label="Search">
+      <button type="submit" aria-label="Search">&#128269;</button>
+    </form>
+
+    {% if customer %}
+    <a class="nav-item" href="/account">
+      <span class="label">Hello, {{ customer.full_name.split(' ')[0] }}</span>
+      <span class="value">Account &amp; Lists</span>
+    </a>
+    {% else %}
+    <a class="nav-item" href="/login">
+      <span class="label">Hello, sign in</span>
+      <span class="value">Account &amp; Lists</span>
+    </a>
+    {% endif %}
+
+    <a class="nav-item" href="/account/orders">
+      <span class="label">Returns</span>
+      <span class="value">&amp; Orders</span>
+    </a>
+
+    <a class="nav-item cart-link" href="/cart">
+      <span>&#128722;</span>
+      <span class="cart-count">{{ cart_count or 0 }}</span>
+      <span class="value">Cart</span>
+    </a>
+  </div>
+
+  <nav class="subnav">
+    <a href="/">All</a>
+    {% for c in nav_categories %}
+    <a href="/c/{{ c.slug }}">{{ c.name }}</a>
+    {% endfor %}
+    <a href="/account/privacy">Your data and privacy</a>
+  </nav>
+</header>
+
+<main class="page">
+  {% if flash %}<div class="flash">{{ flash }}</div>{% endif %}
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="footer">
+  <div class="inner">
+    <p>
+      <a href="/account/privacy">Privacy notice</a> &nbsp;&middot;&nbsp;
+      <a href="/account/privacy#processors">Who we share data with</a> &nbsp;&middot;&nbsp;
+      <a href="/support">Help</a>
+    </p>
+    <p>BharatBazaar Retail Private Limited. A teaching fixture, not a real shop.</p>
+  </div>
+</footer>
+
+</body>
+</html>

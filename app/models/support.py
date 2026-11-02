@@ -1,11 +1,13 @@
 """Customer support tickets and returns.
 
-Support is a product function here rather than a statutory one. There
-is no separate route for a privacy complaint, no named officer and no
-clock on a response, because nobody asked for one.
+The queue is shared between product problems and privacy requests,
+with a category to tell them apart and the s.13(2) clock on every
+row. Routing a privacy request to the same agents who handle a late
+parcel is a weakness, and it is a deliberate one: splitting the queue
+was scoped and not built.
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from sqlalchemy import (
     Boolean,
@@ -39,7 +41,15 @@ class SupportTicket(Base):
 
     assigned_agent = Column(String(120))
     created_at = Column(DateTime, default=datetime.utcnow)
+    # s.13(2) starts a clock. A queue with no deadline on the row
+    # cannot show it was met.
+    respond_by = Column(
+        DateTime, default=lambda: datetime.utcnow() + timedelta(days=30)
+    )
     resolved_at = Column(DateTime)
+    expires_at = Column(
+        DateTime, default=lambda: datetime.utcnow() + timedelta(days=365 * 2)
+    )
 
 
 class ReturnRequest(Base):
@@ -60,6 +70,9 @@ class ReturnRequest(Base):
 
     status = Column(String(24), default="requested")
     requested_at = Column(DateTime, default=datetime.utcnow)
+    expires_at = Column(
+        DateTime, default=lambda: datetime.utcnow() + timedelta(days=365 * 2)
+    )
 
 
 class AbuseReport(Base):
@@ -76,3 +89,6 @@ class AbuseReport(Base):
     details = Column(Text)
     is_actioned = Column(Boolean, default=False)
     reported_at = Column(DateTime, default=datetime.utcnow)
+    expires_at = Column(
+        DateTime, default=lambda: datetime.utcnow() + timedelta(days=365 * 2)
+    )
