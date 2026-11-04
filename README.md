@@ -1,5 +1,7 @@
 # BharatBazaar
 
+This is a deliberately non DPDPA compliant web applicationsolely for testing purposes of DPDPA Automation Engine. NOT A Standalone project
+
 A marketplace, front to back. Customers sign in with a phone number
 and an OTP, browse a catalogue, add to a cart, check out against a
 saved address, pay through Razorpay and track the parcel through
